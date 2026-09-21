@@ -5,6 +5,8 @@ import {
   CartesianGrid,
   Cell,
   LabelList,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -78,16 +80,7 @@ export default function ChartCard({ statusData = [], courseData = [], institutio
       <ChartShell title="Applications by Course" subtitle="Application volume across all available courses">
         <div className="w-full" style={{ height: 285, minWidth: 0 }} aria-label="Bar chart of applications by course">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={courseData} margin={{ top: 24, right: 4, left: -18, bottom: 72 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-              <XAxis
-                dataKey="course_name"
-                tick={{ fontSize: 10, fill: '#475569' }}
-                angle={-38}
-                textAnchor="end"
-                interval={0}
-              />
-              <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: '#475569' }} />
+            <PieChart>
               <Tooltip
                 cursor={{ fill: '#F8FAFC' }}
                 formatter={(value, _name, item) => [
@@ -96,10 +89,23 @@ export default function ChartCard({ statusData = [], courseData = [], institutio
                 ]}
                 labelFormatter={(label) => `Course: ${label}`}
               />
-              <Bar dataKey="applications_count" radius={[5, 5, 0, 0]} fill="#4F46E5">
-                <LabelList dataKey="applications_count" position="top" fill="#334155" fontSize={10} />
-              </Bar>
-            </BarChart>
+              <Pie
+                data={courseData}
+                dataKey="applications_count"
+                nameKey="course_name"
+                cx="50%"
+                cy="50%"
+                innerRadius={52}
+                outerRadius={92}
+                paddingAngle={2}
+                label={({ course_name, applications_count }) => `${course_name}: ${applications_count}`}
+                labelLine={{ stroke: '#94A3B8' }}
+              >
+                {courseData.map((entry, index) => (
+                  <Cell key={entry.course_name} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                ))}
+              </Pie>
+            </PieChart>
           </ResponsiveContainer>
         </div>
       </ChartShell>
