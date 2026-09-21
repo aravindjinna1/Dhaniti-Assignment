@@ -1,203 +1,649 @@
 # Dhaniti — Education Lending Application Intelligence Dashboard
 
-A production-ready portfolio intelligence and application tracking platform for **Dhaniti**. Built specifically for the technical internship assignment to deliver complete end-to-end functionality within an accelerated 1-hour build timeframe.
+An end-to-end portfolio intelligence and loan application tracking dashboard designed for education lending operations.
+
+The application provides portfolio-level analytics, application lifecycle management, data-quality handling, and rule-based attention indicators for loan applications.
 
 ---
 
-## 1. Project Overview & Architecture
+## 1. Project Overview
 
-The application provides credit risk officers, underwriting teams, and academic partnership managers with real-time portfolio health metrics, program risk distributions, and granular loan application lifecycle tracking.
+The Dhaniti dashboard is designed to help lending and underwriting teams monitor education-loan applications through:
 
-### System Architecture
+* Portfolio-level KPIs
+* Application status distribution
+* Course and institution analytics
+* Credit-score distribution
+* Application search, filtering, and sorting
+* Individual application details
+* Application status updates
+* Data-quality monitoring
+* Rule-based attention indicators
+* Calculated business insights
+
+The project uses a React frontend, Node.js/Express backend, and PostgreSQL database, with the provided CSV files serving as the initial source data.
+
+---
+
+## 2. Project Structure
 
 ```text
 dhaniti-internship-project/
-├── backend/                  # Independent Node.js / Express backend
-│   ├── package.json          # Express, pg, dotenv, cors
-│   ├── schema.sql            # Relational PostgreSQL 3NF schema with foreign keys & indexes
-│   ├── scripts/
-│   │   └── seed.js           # Automated ETL ingestion & data-cleaning pipeline
-│   ├── src/
-│   │   ├── app.js            # Express app, CORS, error handling
-│   │   ├── server.js         # HTTP server entry point (Port 5000)
-│   │   ├── db/
-│   │   │   └── index.js      # PostgreSQL connection pool with automated fallback
-│   │   ├── routes/           # RESTful API endpoints (/api/applications, /api/dashboard)
-│   │   ├── controllers/      # Request handlers & response formatting
-│   │   ├── services/         # Core business logic, aggregations, risk rules
-│   │   └── utils/
-│   │       └── dataCleaner.js# Normalization (trimming, typo correction, NULL handling)
-│   ├── .env.example
-│   └── .env
 │
-├── frontend/                 # Independent React / Vite frontend
-│   ├── package.json          # React 18, Vite, Tailwind CSS, Recharts, Lucide Icons
+├── backend/
+│   ├── package.json
+│   ├── schema.sql
+│   ├── scripts/
+│   │   └── seed.js
+│   │
+│   ├── src/
+│   │   ├── app.js
+│   │   ├── server.js
+│   │   │
+│   │   ├── db/
+│   │   │   └── index.js
+│   │   │
+│   │   ├── routes/
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   └── utils/
+│   │       └── dataCleaner.js
+│   │
+│   └── .env.example
+│
+├── frontend/
+│   ├── package.json
 │   ├── vite.config.js
 │   ├── tailwind.config.js
+│   │
 │   ├── src/
 │   │   ├── services/
-│   │   │   └── api.js        # Centralized HTTP client (reads VITE_API_BASE_URL)
-│   │   ├── components/       # UI Components (KPIs, Charts, Table, Modals, Filters)
+│   │   │   └── api.js
+│   │   ├── components/
 │   │   └── pages/
-│   │       └── Dashboard.jsx # Main interactive intelligence dashboard
-│   ├── .env.example
-│   └── .env
+│   │       └── Dashboard.jsx
+│   │
+│   └── .env.example
 │
-├── data/                     # Authoritative CSV datasets
+├── data/
 │   ├── education_loan_applications.csv
 │   ├── institutions.csv
 │   ├── courses.csv
 │   ├── statuses.csv
 │   └── data_dictionary.csv
 │
-├── README.md                 # Complete technical documentation
-└── AI_USAGE.md               # Transparent AI engineering disclosure
+├── README.md
+└── AI_USAGE.md
 ```
 
 ---
 
-## 2. Technology Stack
+## 3. Technology Stack
 
-* **Frontend**: React 18 (JavaScript / JSX), Tailwind CSS, Vite, Recharts, Lucide Icons
-* **Backend**: Node.js, Express.js (JavaScript / CommonJS)
-* **Database**: PostgreSQL (Relational schema with Foreign Keys and B-Tree indexes)
-* **HTTP / Data Fetching**: Native `fetch` with centralized API abstraction layer
+### Frontend
+
+* React 18
+* JavaScript / JSX
+* Vite
+* Tailwind CSS
+* Recharts
+* Lucide Icons
+* Native Fetch API
+
+### Backend
+
+* Node.js
+* Express.js
+* JavaScript / CommonJS
+* REST APIs
+
+### Database
+
+* PostgreSQL
+* Relational schema
+* Foreign keys
+* B-tree indexes
+* SQL aggregations and joins
+
+### Development & Deployment Tools
+
+* Git / GitHub
+* Postman
+* Vercel
+* Render
 
 ---
 
-## 3. Setup & Execution Instructions
+## 4. Application Architecture
+
+The application follows a separated frontend/backend architecture.
+
+```text
+                ┌─────────────────────┐
+                │     React / Vite    │
+                │      Frontend       │
+                └──────────┬──────────┘
+                           │
+                           │ REST API
+                           ▼
+                ┌─────────────────────┐
+                │   Node.js / Express │
+                │       Backend       │
+                └──────────┬──────────┘
+                           │
+             ┌─────────────┴─────────────┐
+             │                           │
+             ▼                           ▼
+     ┌───────────────┐          ┌────────────────┐
+     │   Services    │          │   Controllers  │
+     │ Business Logic│          │ Request/Reply  │
+     └───────┬───────┘          └────────────────┘
+             │
+             ▼
+     ┌─────────────────┐
+     │   PostgreSQL    │
+     │    Database     │
+     └─────────────────┘
+             ▲
+             │
+     ┌─────────────────┐
+     │   CSV Dataset   │
+     │ Seed / Cleaning │
+     └─────────────────┘
+```
+
+---
+
+## 5. Database Design
+
+The PostgreSQL database separates master data from transactional application data.
+
+The main entities include:
+
+* Loan applications
+* Institutions
+* Courses
+* Application statuses
+
+Relationships are maintained through foreign keys such as:
+
+```text
+Applications
+    │
+    ├── institution_id → Institutions
+    │
+    ├── course_id → Courses
+    │
+    └── status_id → Statuses
+```
+
+Indexes are used on frequently queried fields to improve filtering and lookup performance.
+
+The database schema is defined in:
+
+```text
+backend/schema.sql
+```
+
+---
+
+## 6. Setup & Installation
 
 ### Prerequisites
-* Node.js v18+ installed
-* PostgreSQL database instance running (local or cloud-hosted)
 
-### Step 1: Database Setup & Seeding
+Install the following before running the project:
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   npm install
-   ```
-
-2. Configure environment variables in `backend/.env`:
-   ```env
-   PORT=5000
-   DATABASE_URL=postgresql://username:password@localhost:5432/dhaniti_db
-   FRONTEND_URL=http://localhost:5173
-   ```
-
-3. Seed the database from the CSV files:
-   ```bash
-   npm run db:seed
-   ```
-   *This executes `schema.sql`, parses all 5 CSVs, cleans quality defects, and inserts records into PostgreSQL.*
-
-4. Start the backend server:
-   ```bash
-   npm run dev
-   # Server runs on http://localhost:5000
-   ```
-
-### Step 2: Frontend Setup
-
-1. Open a separate terminal and navigate to the frontend directory:
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-2. Configure environment variables in `frontend/.env`:
-   ```env
-   VITE_API_BASE_URL=http://localhost:5000/api
-   ```
-
-3. Start the Vite development server:
-   ```bash
-   npm run dev
-   # Dashboard accessible at http://localhost:5173
-   ```
+* Node.js 18+
+* PostgreSQL
+* npm
 
 ---
 
-## 4. API Endpoints Specification
+### Step 1 — Clone the Repository
+
+```bash
+git clone <repository-url>
+cd dhaniti-internship-project
+```
+
+---
+
+### Step 2 — Backend Setup
+
+Open a terminal:
+
+```bash
+cd backend
+npm install
+```
+
+Create:
+
+```text
+backend/.env
+```
+
+Example:
+
+```env
+PORT=5000
+DATABASE_URL=postgresql://username:password@localhost:5432/dhaniti_db
+FRONTEND_URL=http://localhost:5173
+```
+
+Replace the PostgreSQL username, password, host, port, and database name with your local configuration.
+
+---
+
+### Step 3 — Create the Database
+
+Create a PostgreSQL database named:
+
+```text
+dhaniti_db
+```
+
+The database itself needs to exist before the application connects to it.
+
+The application schema and tables are created through the project's database setup/seed process.
+
+---
+
+### Step 4 — Seed the Database
+
+From the `backend` directory:
+
+```bash
+npm run db:seed
+```
+
+The seed process:
+
+1. Loads the database schema.
+2. Reads the provided CSV datasets.
+3. Cleans and normalizes relevant fields.
+4. Handles known data-quality issues.
+5. Inserts the cleaned records into PostgreSQL.
+
+---
+
+### Step 5 — Start the Backend
+
+```bash
+npm run dev
+```
+
+The backend runs on:
+
+```text
+http://localhost:5000
+```
+
+---
+
+### Step 6 — Frontend Setup
+
+Open another terminal:
+
+```bash
+cd frontend
+npm install
+```
+
+Create:
+
+```text
+frontend/.env
+```
+
+Example:
+
+```env
+VITE_API_BASE_URL=http://localhost:5000/api
+```
+
+Start the frontend:
+
+```bash
+npm run dev
+```
+
+The dashboard will be available at:
+
+```text
+http://localhost:5173
+```
+
+If the frontend configuration uses the development proxy, `VITE_API_BASE_URL` can be omitted for local development.
+
+After changing Vite environment variables, restart the frontend development server.
+
+---
+
+## 7. API Endpoints
 
 ### Dashboard Analytics
-* `GET /api/dashboard/summary` — Key KPIs (Total Volume, Approved, Under Review, Rejected, Loan Amount, Approval Rate).
-* `GET /api/dashboard/status` — Status breakdown with application counts, total loan amount, and percentages.
-* `GET /api/dashboard/courses` — Course demand across degrees with applicant volume and average ticket size.
-* `GET /api/dashboard/institutions` — Institution application volume and approval conversion rates.
-* `GET /api/dashboard/credit-scores` — Credit score bracket distribution (<600, 600-649, 650-699, 700-749, 750+, Missing).
-* `GET /api/dashboard/insights` — 5 calculated real portfolio insights with exact calculation logic.
-* `GET /api/dashboard/data-quality` — 5 documented data quality issues and resolution methods.
 
-### Applications Management
-* `GET /api/applications` — List applications with query parameters: `search`, `status`, `course`, `institution`, `sortBy`, `order`.
-* `GET /api/applications/:id` — View full joined application profile including academic and financial data.
-* `POST /api/applications` — Create a new loan application record with validation.
-* `PATCH /api/applications/:id/status` — Update application status (`Submitted`, `Under Review`, `Approved`, `Rejected`).
-* `GET /api/applications/meta/filters` — Master filter dropdown options.
+| Method | Endpoint                       | Description                                    |
+| ------ | ------------------------------ | ---------------------------------------------- |
+| GET    | `/api/dashboard/summary`       | Portfolio KPIs                                 |
+| GET    | `/api/dashboard/status`        | Application status distribution                |
+| GET    | `/api/dashboard/courses`       | Course-level demand and loan analytics         |
+| GET    | `/api/dashboard/institutions`  | Institution application and approval analytics |
+| GET    | `/api/dashboard/credit-scores` | Credit-score distribution                      |
+| GET    | `/api/dashboard/insights`      | Calculated portfolio insights                  |
+| GET    | `/api/dashboard/data-quality`  | Data-quality observations                      |
 
----
+### Applications
 
-## 5. Data Quality Issues Identified & Handled
+| Method | Endpoint                         | Description               |
+| ------ | -------------------------------- | ------------------------- |
+| GET    | `/api/applications`              | List applications         |
+| GET    | `/api/applications/:id`          | Get application details   |
+| POST   | `/api/applications`              | Create an application     |
+| PATCH  | `/api/applications/:id/status`   | Update application status |
+| GET    | `/api/applications/meta/filters` | Retrieve filter options   |
 
-The dataset contained deliberate data quality challenges. The cleaning pipeline (`backend/src/utils/dataCleaner.js`) handled them as follows:
+### Application Filters
 
-| Issue ID | Anomaly Description | Affected Record(s) | Resolution Method | Engineering Rationale |
-| :--- | :--- | :--- | :--- | :--- |
-| **DQ-001** | Missing Credit Score | `EDU1092` (Lakshmi Rao) | Preserved as `NULL` / `N/A` in database & UI | Imputing with 0 falsely labels the borrower delinquent; imputing with mean fabricates history. Preserving NULL ensures underwriters conduct manual bureau checks. |
-| **DQ-002** | State Name Typo | `EDU1134` (`"Telengana"`) | Normalized to canonical `"Telangana"` | Eliminates duplicate geographic tags, enabling clean analytics and accurate regional filtering. |
-| **DQ-003** | Trailing Whitespace | `EDU1065` (`"MBA "`), `EDU1121` (`"Website "`) | Applied `.trim()` during data ingestion | Prevents exact SQL string matching failures (`WHERE course_name = 'MBA'`) and split legend categories. |
-| **DQ-004** | Master Data Inconsistencies | `EDU1032` (Abbreviated institute name), `EDU1065` (ID vs course text) | Relational Foreign Key binding via `institution_id` and `course_id` | Enforces relational integrity where the master entity tables serve as the single source of truth. |
-| **DQ-005** | Over-Financing Anomaly | `EDU1143` (Loan ₹5.40L vs Fee ₹4.40L) | Retained as submitted; flagged in UI via Attention Level | Lenders must not modify borrower submissions; flagging highlights excessive non-tuition living expense requests. |
+The applications endpoint supports parameters such as:
 
----
+```text
+search
+status
+course
+institution
+sortBy
+order
+```
 
-## 6. 5 Calculated Business Insights
+Example:
 
-1. **High In-Progress Funnel (47.3% Pipeline)**
-   * *Finding*: 71 of 150 applications are currently non-terminal (55 Under Review, 16 Submitted).
-   * *Calculation*: `(55 + 16) / 150 = 47.3%`.
-   * *Business Impact*: Nearly half of portfolio capital is stalled in evaluation. Streamlining turnaround times will accelerate loan disbursement velocity.
-2. **Disproportionate Capital Exposure in Medical Degrees (3.7x Higher)**
-   * *Finding*: MBBS applications average ₹12,02,743 per applicant, compared to ₹3,27,998 for undergraduate management (BBA).
-   * *Calculation*: Arithmetic mean of `loan_amount_requested_inr` grouped by `course_id`.
-   * *Business Impact*: High ticket sizes and multi-year completion timelines require co-borrower guarantees and specialized tranche-disbursement structures.
-3. **Credit Score Divergence (+59 Point Gap)**
-   * *Finding*: Approved applicants average a 715 credit score, whereas rejected applicants average 656.
-   * *Calculation*: Average `credit_score` grouped by status (excluding null values).
-   * *Business Impact*: Validates underwriting alignment, indicating applicants below 650 should be prompted for co-signers prior to formal submission.
-4. **Partner Channel Concentration (66.7% Referral Origination)**
-   * *Finding*: Counsellor (37), Institution Referral (34), and Partner Referral (29) generate 100 out of 150 applications.
-   * *Calculation*: Sum of referral channels divided by 150.
-   * *Business Impact*: Dhaniti is predominantly partner-driven. Direct-to-consumer digital channels (16.7%) represent an untapped acquisition expansion opportunity.
-5. **Severe Debt-to-Income Outliers (FOIR > 100%)**
-   * *Finding*: Applicants like `EDU1019` (₹50k debt on ₹45k income) and `EDU1008` (₹7.6k debt on ₹0 income) present household debt exceeding stated earnings.
-   * *Calculation*: Filter where `existing_monthly_obligations_inr >= parent_monthly_income_inr`.
-   * *Business Impact*: Indicates immediate default risk that should trigger automated pre-underwriting screening before manual assessment.
+```text
+GET /api/applications?status=Approved&sortBy=loan_amount&order=desc
+```
 
 ---
 
-## 7. Illustrative Attention Level (Rule-Based Analytics)
+## 8. Data Quality Handling
 
-To assist loan officers in prioritizing files, applications feature a rule-based **Attention Level**:
-* **High Attention**: Credit score < 600, OR existing monthly obligations exceed monthly income, OR loan requested exceeds course tuition fee.
-* **Review Required**: Credit score between 600–680, OR Fixed Obligation to Income Ratio (FOIR) > 40%, OR Missing credit score (requires manual bureau fetch).
-* **Low Attention**: Meets standard benchmark criteria.
+The provided dataset contains several intentional data-quality issues.
 
-*Disclaimer: This is an illustrative portfolio analytics feature and does not constitute formal underwriting credit policy.*
+The ingestion process handles these issues without silently modifying information that should remain available for review.
+
+| Issue                         | Example                       | Handling                                             |
+| ----------------------------- | ----------------------------- | ---------------------------------------------------- |
+| Missing credit score          | `EDU1092`                     | Preserved as `NULL` / `N/A`                          |
+| State-name typo               | `Telengana`                   | Normalized to `Telangana`                            |
+| Trailing whitespace           | `MBA ` / `Website `           | Trimmed during ingestion                             |
+| Master-data inconsistency     | Institution/course references | Relational master tables used as the source of truth |
+| Loan amount above tuition fee | `EDU1143`                     | Retained and surfaced as an attention condition      |
+
+### Why missing credit scores are preserved
+
+A missing credit score is not treated as a score of zero.
+
+Replacing a missing score with zero would introduce a value that does not exist in the source data and could distort portfolio analytics.
+
+Instead, the value remains missing and can be identified for further verification.
 
 ---
 
-## 8. Trade-Offs & Future Improvements
+## 9. Portfolio Insights
 
-### Trade-Offs Made (1-Hour Time Limit)
-* **Zero Authentication**: Omitted login/RBAC to deliver complete core features within the 1-hour constraint.
-* **Synchronous Aggregations**: Calculated analytics via direct database/service queries rather than maintaining materialized views or background cron jobs.
-* **In-Memory Graceful Fallback**: Added in-memory dataset handling so reviewers can run and test the frontend/backend even without a live local PostgreSQL instance configured.
+The dashboard calculates several business-oriented observations from the application dataset.
 
-### Future Roadmap
-1. Role-based access control (Credit Officer vs. Institution Partner vs. Admin).
-2. Automated PDF document generation for loan sanction letters.
-3. Webhook integration with credit bureaus (CIBIL/Experian) to automatically resolve missing scores.
-4. Automated EMI repayment simulation calculator based on loan tenor.
+### 1. In-Progress Application Pipeline
+
+The dataset contains:
+
+* 55 applications under review
+* 16 submitted applications
+* 150 total applications
+
+Calculation:
+
+```text
+(55 + 16) / 150 × 100 = 47.3%
+```
+
+This represents the proportion of applications that are currently in non-terminal stages.
+
+---
+
+### 2. Medical Loan Ticket Size
+
+MBBS applications have a substantially higher average requested loan amount than BBA applications in the provided dataset.
+
+The comparison is calculated using the average:
+
+```text
+loan_amount_requested_inr
+```
+
+grouped by course.
+
+---
+
+### 3. Credit Score Distribution by Application Status
+
+Average credit scores can be compared across application statuses while excluding missing credit-score values.
+
+For the supplied dataset:
+
+```text
+Approved: approximately 715
+Rejected: approximately 656
+```
+
+This provides a descriptive view of how credit scores are distributed across application outcomes.
+
+---
+
+### 4. Referral Channel Concentration
+
+The dataset contains multiple application referral channels.
+
+Counsellor, Institution Referral, and Partner Referral account for a substantial portion of the applications.
+
+The dashboard calculates the contribution of each channel to total application volume.
+
+---
+
+### 5. High Debt-to-Income Cases
+
+Applications where existing monthly obligations are greater than or equal to stated monthly income are surfaced for additional attention.
+
+Example rule:
+
+```text
+existing_monthly_obligations_inr
+    >=
+parent_monthly_income_inr
+```
+
+These cases are presented as analytical indicators rather than automatic lending decisions.
+
+---
+
+## 10. Attention Level
+
+The application table includes a rule-based **Attention Level** intended to help users identify applications that may require additional review.
+
+### High Attention
+
+Triggered when one or more of the following conditions are met:
+
+* Credit score < 600
+* Existing monthly obligations ≥ monthly income
+* Requested loan amount > course tuition fee
+
+### Review Required
+
+Triggered when:
+
+* Credit score is between 600 and 680
+* FOIR is above 40%
+* Credit score is missing
+
+### Low Attention
+
+Applications that do not meet the defined attention conditions.
+
+> **Note:** Attention Level is an illustrative analytics feature for this assignment. It is not intended to represent a formal credit-underwriting policy or automated lending decision.
+
+---
+
+## 11. Key Dashboard Features
+
+### Portfolio Overview
+
+Displays high-level metrics such as:
+
+* Total applications
+* Total requested loan amount
+* Approved applications
+* Applications under review
+* Rejected applications
+* Approval rate
+
+### Status Analysis
+
+Visualizes the distribution of applications across:
+
+* Submitted
+* Under Review
+* Approved
+* Rejected
+
+### Course Analysis
+
+Provides:
+
+* Application volume by course
+* Degree/course distribution
+* Average requested loan amount
+
+### Institution Analysis
+
+Provides:
+
+* Application volume by institution
+* Approval conversion
+* Institution-level portfolio distribution
+
+### Credit Score Analysis
+
+Groups applicants into credit-score ranges:
+
+```text
+< 600
+600–649
+650–699
+700–749
+750+
+Missing
+```
+
+### Application Management
+
+Users can:
+
+* Search applications
+* Filter applications
+* Sort application records
+* View detailed application information
+* Update application status
+* Review attention indicators
+
+---
+
+## 12. Trade-Offs
+
+Given the limited implementation timeframe, several features were intentionally kept outside the core scope.
+
+### Authentication and Authorization
+
+Authentication and role-based access control were not included.
+
+Potential future roles include:
+
+* Credit Officer
+* Institution Partner
+* Administrator
+
+### Analytics Processing
+
+Dashboard analytics are calculated through database/service queries rather than a separate analytics warehouse or materialized reporting layer.
+
+For a larger production system, frequently requested metrics could be pre-aggregated.
+
+### Data Import
+
+The current workflow is designed around the provided CSV datasets.
+
+A production system could replace or supplement this process with:
+
+* Scheduled ingestion jobs
+* External APIs
+* Partner integrations
+* Event-driven data pipelines
+
+---
+
+## 13. Future Improvements
+
+Potential extensions include:
+
+1. Role-based authentication and authorization.
+2. Automated loan-document generation.
+3. Credit-bureau integrations for missing credit scores.
+4. EMI and repayment simulation.
+5. Advanced audit logging.
+6. Automated data-quality monitoring.
+7. Background processing for large datasets.
+8. Pagination and optimized database queries for larger portfolios.
+9. Automated testing for API and business-logic layers.
+10. Production monitoring and error tracking.
+
+---
+
+## 14. Running the Project
+
+For local development, run the backend and frontend in separate terminals.
+
+### Backend
+
+```bash
+cd backend
+npm install
+npm run db:seed
+npm run dev
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+Then open:
+
+```text
+http://localhost:5173
+```
+
+---
+
+## 15. Project Notes
+
+The project is structured as two independently runnable applications:
+
+* `backend/` — Node.js/Express REST API and database layer
+* `frontend/` — React/Vite dashboard interface
+
+Both directories contain their own `package.json` and dependency configuration.
+
+The CSV files under `data/` act as the initial dataset used to populate the PostgreSQL database.

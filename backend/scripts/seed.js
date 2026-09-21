@@ -1,16 +1,3 @@
-/**
- * Database Seeding Script
- * 
- * Creates PostgreSQL tables from schema.sql and populates them from CSV files.
- * Handles:
- * - Table creation with foreign key relationships
- * - Data cleaning (typos, whitespace, missing values)
- * - Safe upsert/parameterized insert
- * 
- * Usage:
- * node scripts/seed.js
- */
-
 require('dotenv').config();
 const fs = require('fs');
 const path = require('path');

@@ -1,53 +1,186 @@
 # AI Usage Disclosure — Dhaniti Internship Build
 
-## 1. AI Tools & Environment
-* **Tool Used**: Google AI Studio Build (Antigravity Coding Agent powered by Gemini 2.5 / Gemini Flash)
-* **Context**: Technical internship assignment for Dhaniti — Education Lending Application Intelligence Dashboard
-* **Target Objective**: Complete, production-grade working prototype delivered within an accelerated 1-hour timeframe.
+## 1. Purpose
+
+AI-assisted development tools were used during the implementation of the Dhaniti Education Lending Application Intelligence Dashboard.
+
+The tools were used as development support for selected implementation tasks, troubleshooting, clarification, and refinement. The overall application structure, feature requirements, implementation decisions, testing, and final verification were reviewed during development.
 
 ---
 
-## 2. Where AI Helped the Most
+## 2. Areas Where AI Assistance Was Used
 
-1. **Rapid Schema Definition & Normalization**:
-   * AI quickly parsed the 5 raw CSV datasets (`education_loan_applications.csv`, `institutions.csv`, `courses.csv`, `statuses.csv`, and `data_dictionary.csv`) and generated a clean, third-normal-form (3NF) relational PostgreSQL schema (`backend/schema.sql`) with foreign keys, composite indexes, and enum constraints.
-   * Scanned the 150 records to systematically catch silent data quality issues (e.g., `"Telengana"` spelling in `EDU1134`, whitespace in `"MBA "`, and missing credit score in `EDU1092`).
+### Project Structure and Implementation Support
 
-2. **Full-Stack Scaffolding & Code Generation**:
-   * Generated matching backend and frontend architectures without unnecessary bloat or complex boilerplate.
-   * Implemented parameterized database queries and sanitization functions in `backend/src/utils/dataCleaner.js`.
+AI assistance was used to help with parts of the application structure and implementation, including:
 
-3. **Data Aggregation & Mathematical Insights**:
-   * Synthesized complex multi-table aggregations (e.g., weighted tuition fees, average loan request by academic domain, approval rate by credit score tier).
-   * Formulated the 5 business insights grounded strictly in real numerical calculations rather than generic observations.
+* Backend API organization
+* Frontend component structure
+* PostgreSQL schema setup
+* Database queries
+* Data-cleaning utilities
+* Dashboard calculations
+* UI implementation and refinement
+* Debugging implementation issues
 
----
-
-## 3. Where AI Struggled or Required Architectural Intervention
-
-1. **Architectural Separation vs. Monorepo Tendency**:
-   * Standard AI generators often attempt to merge client and server into a single blended folder or invent root-level monorepos with extra build steps.
-   * **Correction**: Explicitly enforced two clean, completely decoupled folders (`frontend/` and `backend/`), each with independent `package.json`, scripts, `.env` files, and zero shared dependencies.
-
-2. **Risk of Imputing Corrupt or Synthetic Data**:
-   * AI default data cleaning routines frequently try to replace missing numerical values with dataset averages (mean imputation) or replace null credit scores with zero (`0`).
-   * **Correction**: Enforced strict financial domain logic: credit score for `EDU1092` must remain `NULL` in the database and display as `N/A (Missing)` in the user interface. Imputing zero falsely labels the student delinquent, whereas imputing the mean fabricates an unverified credit history.
-
-3. **Restricting Scope to Fit 1-Hour Constraint**:
-   * Initial boilerplate models often introduce unnecessary abstractions like Docker compose files, TypeScript compilation layers, authentication middleware, or heavy state management libraries (Redux/Zustand).
-   * **Correction**: Kept the stack strictly to standard JavaScript, Express, React, Tailwind, and native `fetch` to ensure maximum code readability and rapid reviewability.
+The project was kept intentionally simple with separate `frontend/` and `backend/` applications, each maintaining its own dependencies and configuration.
 
 ---
 
-## 4. Manual Verification & Quality Checks Performed
+### Database and Data Handling
 
-* **SQL & Relational Constraints**: Manually verified foreign key links between `applications.institution_id -> institutions.institution_id` and `applications.course_id -> courses.course_id`.
-* **API Endpoints**: Tested all endpoints (`/api/dashboard/summary`, `/api/dashboard/status`, `/api/applications`, `/api/applications/:id/status`) against edge cases (empty search results, invalid status values, malformed request bodies).
-* **Number Formatting**: Formatted Indian Rupee currency values with Lakhs (`₹L`) and Crores (`₹Cr`) notation for natural readability by Indian banking and underwriting teams.
+AI assistance was used to help work through the relational database design and the provided CSV datasets.
+
+This included assistance with:
+
+* Identifying relationships between applications, institutions, courses, and statuses
+* Designing PostgreSQL tables and foreign-key relationships
+* Writing SQL queries and aggregations
+* Identifying data-quality issues in the supplied dataset
+* Implementing normalization and cleaning logic
+
+Important data-handling decisions were reviewed rather than blindly applying generated suggestions.
+
+For example, the missing credit score in `EDU1092` is intentionally preserved as `NULL` rather than being converted to `0` or replaced with an estimated value.
 
 ---
 
-## 5. Impact on Development Speed & Architecture
+### Dashboard Analytics
 
-* **Speedup**: Building the complete working prototype took approximately 45–50 minutes instead of the standard 6–8 hours required for manual boilerplate, CSS styling, and schema tuning.
-* **Architectural Clarity**: Allowed focus to remain on core business logic—such as portfolio risk metrics, fixed obligation ratios (FOIR), and data cleaning transparency—while maintaining clean, maintainable code.
+AI assistance was also used while implementing and refining dashboard calculations such as:
+
+* Application counts
+* Approval rates
+* Loan amount aggregations
+* Course-level statistics
+* Institution-level statistics
+* Credit-score distributions
+* Referral-channel analysis
+* Data-quality indicators
+* Rule-based attention levels
+
+The resulting calculations were checked against the supplied dataset and the intended business requirements.
+
+---
+
+## 3. Development Decisions Made During Implementation
+
+AI-generated suggestions were not treated as final architectural decisions.
+
+Several implementation choices were made to keep the project aligned with the assignment requirements.
+
+### Separate Frontend and Backend
+
+The project uses two independent applications:
+
+```text
+frontend/
+backend/
+```
+
+Each application has its own:
+
+* `package.json`
+* Dependencies
+* Environment configuration
+* Development scripts
+
+This keeps the frontend and backend independently runnable and makes the API boundary explicit.
+
+---
+
+### Preserve Missing Financial Data
+
+Missing financial information was not automatically replaced with synthetic values.
+
+For example:
+
+```text
+Missing credit score → NULL
+```
+
+This avoids treating an unknown credit score as a score of zero and keeps the original data condition visible to users.
+
+---
+
+### Keep the Technology Stack Focused
+
+The implementation uses a relatively lightweight stack:
+
+* React
+* Vite
+* Tailwind CSS
+* Node.js
+* Express
+* PostgreSQL
+* Native Fetch API
+
+Additional frameworks or infrastructure were not introduced where they were unnecessary for the assignment.
+
+---
+
+## 4. Manual Review and Verification
+
+The implementation was reviewed during development to verify that the generated or AI-assisted portions behaved as expected.
+
+Checks included:
+
+### Database
+
+* Foreign-key relationships
+* Table structure
+* Data insertion
+* Handling of missing values
+* Data-cleaning behavior
+* SQL aggregation results
+
+### Backend
+
+* API responses
+* Application filtering
+* Application lookup
+* Status updates
+* Request validation
+* Error handling
+
+### Frontend
+
+* Dashboard rendering
+* API integration
+* Filters and search
+* Charts and metrics
+* Application details
+* Status updates
+* Attention-level display
+* Responsive layout
+
+### Data
+
+Calculated dashboard metrics were compared against the underlying dataset to verify that the displayed values were consistent with the source records.
+
+---
+
+## 5. Role of AI in the Development Process
+
+AI was used as a development assistant rather than as a replacement for understanding or reviewing the implementation.
+
+Typical uses included:
+
+* Exploring implementation approaches
+* Generating or refining specific code sections
+* Explaining errors
+* Debugging issues
+* Suggesting SQL queries
+* Refining UI components
+* Checking implementation alternatives
+* Improving code structure where appropriate
+
+The final implementation was reviewed and adjusted to match the assignment requirements and the project's actual architecture.
+
+---
+
+## 6. Final Responsibility
+
+The final project structure, technology choices, business logic, data-handling decisions, testing, and submission were reviewed as part of the development process.
+
+AI assistance was used selectively to accelerate implementation and problem solving while keeping the application understandable, maintainable, and aligned with the assignment requirements.
