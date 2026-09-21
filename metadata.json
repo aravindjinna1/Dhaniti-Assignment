@@ -1,0 +1,6 @@
+{
+  "name": "Dhaniti Education Lending Intelligence Dashboard",
+  "description": "Education lending application intelligence dashboard for Dhaniti, featuring real application analytics, data quality audit, and application management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
